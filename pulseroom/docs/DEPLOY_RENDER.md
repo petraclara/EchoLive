@@ -20,7 +20,7 @@ git push -u origin main
 1. Go to [dashboard.render.com](https://dashboard.render.com)
 2. **New** → **Blueprint**
 3. Connect your GitHub repo
-4. Render reads `render.yaml` and creates:
+4. Render reads **`render.yaml` at the repository root** (for this project: `AI Workshop/render.yaml`, not `pulseroom/render.yaml`) and creates:
    - `pulseroom-db` (PostgreSQL)
    - `pulseroom-api` (Docker / Go API)
    - `pulseroom-web` (Next.js)

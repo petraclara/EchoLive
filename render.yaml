@@ -1,5 +1,5 @@
-# NOTE: Render only reads render.yaml at the Git repo root.
-# Use ../render.yaml (AI Workshop/render.yaml), not this file.
+# Render Blueprint — must live at the Git repository root
+# Repo root: AI Workshop/  →  app code: pulseroom/
 
 databases:
   - name: pulseroom-db
@@ -8,11 +8,10 @@ databases:
     plan: free
 
 services:
-  # Go API + WebSockets
   - type: web
     name: pulseroom-api
     runtime: docker
-    rootDir: apps/api
+    rootDir: pulseroom/apps/api
     plan: free
     healthCheckPath: /health
     envVars:
@@ -40,11 +39,10 @@ services:
           name: pulseroom-api
           envVarKey: RENDER_EXTERNAL_URL
 
-  # Next.js frontend
   - type: web
     name: pulseroom-web
     runtime: node
-    rootDir: apps/web
+    rootDir: pulseroom/apps/web
     plan: free
     buildCommand: npm install && npm run build
     startCommand: npm start
