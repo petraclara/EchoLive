@@ -1,0 +1,63 @@
+# Render Blueprint — https://render.com/docs/blueprint-spec
+# Deploy: Dashboard → New → Blueprint → connect this repo
+
+databases:
+  - name: pulseroom-db
+    databaseName: pulseroom
+    user: pulseroom
+    plan: free
+
+services:
+  # Go API + WebSockets
+  - type: web
+    name: pulseroom-api
+    runtime: docker
+    rootDir: apps/api
+    plan: free
+    healthCheckPath: /health
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: pulseroom-db
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+      - key: MIGRATIONS_DIR
+        value: migrations
+      - key: WEB_APP_URL
+        fromService:
+          type: web
+          name: pulseroom-web
+          envVarKey: RENDER_EXTERNAL_URL
+      - key: CORS_ORIGIN
+        fromService:
+          type: web
+          name: pulseroom-web
+          envVarKey: RENDER_EXTERNAL_URL
+      - key: API_PUBLIC_URL
+        fromService:
+          type: web
+          name: pulseroom-api
+          envVarKey: RENDER_EXTERNAL_URL
+
+  # Next.js frontend
+  - type: web
+    name: pulseroom-web
+    runtime: node
+    rootDir: apps/web
+    plan: free
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_VERSION
+        value: "20"
+      - key: NEXT_PUBLIC_API_URL
+        fromService:
+          type: web
+          name: pulseroom-api
+          envVarKey: RENDER_EXTERNAL_URL
+      - key: NEXT_PUBLIC_WS_URL
+        fromService:
+          type: web
+          name: pulseroom-api
+          envVarKey: RENDER_EXTERNAL_URL

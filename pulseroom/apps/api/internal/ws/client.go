@@ -14,16 +14,21 @@ const (
 	maxMessageSize = 4096
 )
 
-func NewUpgrader(allowedOrigin string) websocket.Upgrader {
+func NewUpgrader(allowedOrigins []string) websocket.Upgrader {
 	return websocket.Upgrader{
 		ReadBufferSize:  1024,
 		WriteBufferSize: 1024,
 		CheckOrigin: func(r *http.Request) bool {
 			origin := r.Header.Get("Origin")
-			if allowedOrigin == "*" || origin == "" {
+			if origin == "" {
 				return true
 			}
-			return origin == allowedOrigin
+			for _, allowed := range allowedOrigins {
+				if allowed == "*" || origin == allowed {
+					return true
+				}
+			}
+			return false
 		},
 	}
 }

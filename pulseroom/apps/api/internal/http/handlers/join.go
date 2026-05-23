@@ -7,6 +7,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
+	"github.com/pulseroom/api/internal/config"
 	"github.com/pulseroom/api/internal/models"
 	"github.com/pulseroom/api/internal/repository"
 )
@@ -49,7 +50,7 @@ func (h *JoinHandler) Join(w http.ResponseWriter, r *http.Request) {
 		"event_id":       e.ID,
 		"session_token":  token,
 		"event":          bootstrap,
-		"ws_url":         h.APIURL + "/ws/events/" + e.ID.String() + "?token=" + token,
+		"ws_url":         config.HTTPToWS(h.APIURL) + "/ws/events/" + e.ID.String() + "?token=" + token,
 		"attendee_path":  "/e/" + e.ID.String(),
 	})
 }

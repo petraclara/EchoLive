@@ -3,6 +3,7 @@ package http
 import (
 	"net/http"
 	"os"
+	"strings"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -24,11 +25,19 @@ func NewServer(cfg config.Config, store *repository.Store, hub *ws.Hub) *Server 
 	r.Use(middleware.Recoverer)
 	r.Use(middleware.RealIP)
 
-	webURL := getEnv("WEB_APP_URL", "http://localhost:3000")
-	apiURL := getEnv("API_PUBLIC_URL", "http://localhost:8080")
+	webURL := config.PublicWebURL()
+	apiURL := config.PublicAPIURL()
+	corsOrigins := []string{cfg.CORSOrigin, webURL}
+	if extra := os.Getenv("CORS_ORIGINS"); extra != "" {
+		for _, o := range strings.Split(extra, ",") {
+			if o = strings.TrimSpace(o); o != "" {
+				corsOrigins = append(corsOrigins, o)
+			}
+		}
+	}
 
 	r.Use(cors.Handler(cors.Options{
-		AllowedOrigins:   []string{cfg.CORSOrigin, webURL},
+		AllowedOrigins:   corsOrigins,
 		AllowedMethods:   []string{"GET", "POST", "PATCH", "DELETE", "OPTIONS"},
 		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type"},
 		ExposedHeaders:   []string{"Link"},
@@ -41,7 +50,10 @@ func NewServer(cfg config.Config, store *repository.Store, hub *ws.Hub) *Server 
 	annH := &handlers.AnnouncementHandler{Store: store, Hub: hub}
 	joinH := &handlers.JoinHandler{Store: store, APIURL: apiURL, WebAppURL: webURL}
 	resH := &handlers.ResourceHandler{Store: store, Hub: hub}
-	wsH := &handlers.WSHandler{Store: store, Hub: hub, JWTSecret: cfg.JWTSecret, CORSOrigin: cfg.CORSOrigin}
+	wsH := &handlers.WSHandler{
+		Store: store, Hub: hub, JWTSecret: cfg.JWTSecret,
+		AllowedOrigins: corsOrigins,
+	}
 
 	r.Get("/health", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
@@ -84,11 +96,4 @@ func NewServer(cfg config.Config, store *repository.Store, hub *ws.Hub) *Server 
 	r.Get("/ws/events/{eventID}", wsH.Serve)
 
 	return &Server{Router: r}
-}
-
-func getEnv(key, fallback string) string {
-	if v := os.Getenv(key); v != "" {
-		return v
-	}
-	return fallback
 }

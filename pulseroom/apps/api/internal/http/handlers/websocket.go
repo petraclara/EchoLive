@@ -14,10 +14,10 @@ import (
 )
 
 type WSHandler struct {
-	Store       *repository.Store
-	Hub         *ws.Hub
-	JWTSecret   string
-	CORSOrigin  string
+	Store          *repository.Store
+	Hub            *ws.Hub
+	JWTSecret      string
+	AllowedOrigins []string
 }
 
 func (h *WSHandler) Serve(w http.ResponseWriter, r *http.Request) {
@@ -51,7 +51,7 @@ func (h *WSHandler) Serve(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	upgrader := ws.NewUpgrader(h.CORSOrigin)
+	upgrader := ws.NewUpgrader(h.AllowedOrigins)
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		return

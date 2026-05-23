@@ -101,9 +101,13 @@ pulseroom/
 | `NEXT_PUBLIC_API_URL` | `http://localhost:8080` |
 | `NEXT_PUBLIC_WS_URL` | `ws://localhost:8080` |
 
-## Deployment (suggested)
+## Deployment
 
-- **Web**: Vercel — set `NEXT_PUBLIC_API_URL` and `NEXT_PUBLIC_WS_URL` to your API host.
+**Render (recommended):** See [docs/DEPLOY_RENDER.md](docs/DEPLOY_RENDER.md) — includes `render.yaml` Blueprint for Postgres + API + Web.
+
+Other options:
+
+- **Web**: Vercel — set `NEXT_PUBLIC_API_URL` (WebSocket URL is derived automatically).
 - **API**: Fly.io or Railway — expose port 8080 with WebSocket support (idle timeout ≥ 60s).
 - **DB**: Neon, Supabase, or RDS PostgreSQL.
 
